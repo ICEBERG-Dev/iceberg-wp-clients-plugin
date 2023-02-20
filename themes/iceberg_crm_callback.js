@@ -206,11 +206,17 @@ function extractNumbers(phone) {
   
   }
   }
+
+  function setup_custom_btns(){
+    document.querySelectorAll('#initIcebergCallBackWidget').forEach(element => {
+        element.setAttribute('onclick', "toggleModalCallbackWidget('callbackModal', 'callbackModalBG')");
+    })
+  }
   
   
   jQuery(document).ready(function($){
       phoneMaskOnLoad()
       nameManOnLoad()
       iceberg_render_qr_for_link()
-      
+      setup_custom_btns()
   })

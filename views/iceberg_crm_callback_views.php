@@ -31,6 +31,12 @@ function iceberg_crm_callback_settings_page_callback() {
         ?>
         </form>
         <div style="padding: 5px 25px;background-color: rgb(232, 232, 232);border-radius: 10px;margin: 10px 0px;">
+            <h2>Set this ID to your buttons to call widget!</h2>
+            <div style="display: flex; flex-direction: row;">
+                <pre style="margin-right: 10px">[ initIcebergCallBackWidget ]</pre>
+            </div>           
+        </div>
+        <div style="padding: 5px 25px;background-color: rgb(232, 232, 232);border-radius: 10px;margin: 10px 0px;">
             <h2>Also you can set your QR to contact!</h2>
             <?php
 
