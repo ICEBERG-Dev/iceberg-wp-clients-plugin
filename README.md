@@ -1,1 +1,0 @@
-# iceberg-wp-callback-plugin
