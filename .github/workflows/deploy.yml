@@ -1,0 +1,105 @@
+name: WP Callback API Service CI/CD
+
+on:
+  push:
+    branches:
+      - master
+
+env:
+  GCR_CREDENTIALS: ${{ secrets.GCR_CREDENTIALS }}
+  GCR_PROJECT_ID: ${{ secrets.GCR_PROJECT_ID }}
+  REPO_NAME: ${{ secrets.GCR_CONTAINER_NAME }}
+  DOCKER_CONTAINER_PORT: ${{ secrets.DOCKER_CONTAINER_PORT }}
+  GIT_COMMIT_KEY: $(echo ${GITHUB_SHA} | cut -c1-7)
+
+jobs:
+  build-and-push:
+    runs-on: ubuntu-latest
+
+    steps:        
+    - name: Checkout code
+      uses: actions/checkout@v2
+      
+    - name: Build Docker Image
+      run: |
+        docker build -t ${{ env.REPO_NAME }}:${{ env.GIT_COMMIT_KEY }} .
+        
+    - name: Authenticate with GCR
+      run: |
+        echo $GCR_CREDENTIALS > ${HOME}/gcloud-service-key.json
+        gcloud auth activate-service-account --key-file=${HOME}/gcloud-service-key.json
+        gcloud config set project ${{ env.GCR_PROJECT_ID }}
+        gcloud auth configure-docker
+
+    - name: Tag and Push Docker Image to GCR
+      run: |
+        docker tag ${{ env.REPO_NAME }}:${{ env.GIT_COMMIT_KEY }} gcr.io/${{ env.GCR_PROJECT_ID }}/${{ env.REPO_NAME }}:${{ env.GIT_COMMIT_KEY }}
+        docker tag ${{ env.REPO_NAME }}:${{ env.GIT_COMMIT_KEY }} gcr.io/${{ env.GCR_PROJECT_ID }}/${{ env.REPO_NAME }}:latest
+        docker push gcr.io/${{ env.GCR_PROJECT_ID }}/${{ env.REPO_NAME }}:${{ env.GIT_COMMIT_KEY }}
+        docker push gcr.io/${{ env.GCR_PROJECT_ID }}/${{ env.REPO_NAME }}:latest
+    
+    - name: GCR cleanup
+      run: |
+        gcloud container images list-tags gcr.io/${{ env.GCR_PROJECT_ID }}/${{ env.REPO_NAME }} \
+        --format='get(digest)' \
+        --sort-by=~timestamp \
+        | awk '{if(NR>5)print}' \
+        | xargs -I {} gcloud container images delete gcr.io/${{ env.GCR_PROJECT_ID }}/${{ env.REPO_NAME }}@{} --force-delete-tags
+    
+  pull-and-deploy:
+    runs-on: ubuntu-latest
+    needs: build-and-push
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Authenticate with GCR
+        run: |
+          echo $GCR_CREDENTIALS > ${HOME}/gcloud-service-key.json
+          gcloud auth activate-service-account --key-file=${HOME}/gcloud-service-key.json
+          gcloud config set project ${{ env.GCR_PROJECT_ID }}
+          gcloud auth configure-docker
+
+      - name: Pull Docker Image
+        run: |
+          docker pull gcr.io/${{ env.GCR_PROJECT_ID }}/${{ env.REPO_NAME }}:latest
+
+      - name: Save Docker image.tar
+        run: |
+          docker save -o image.tar gcr.io/${{ env.GCR_PROJECT_ID }}/${{ env.REPO_NAME }}:latest
+          
+      - name: Upload Docker Image to Server
+        uses: appleboy/scp-action@master
+        with:
+          host: ${{ secrets.SERVER_SSH_HST }}
+          username: ${{ secrets.SERVER_SSH_USR }}
+          password: ${{ secrets.SERVER_SSH_PSWD }}
+          source: ./image.tar
+          target: /home/user
+
+      - name: Deploy Docker Image
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.SERVER_SSH_HST }}
+          username: ${{ secrets.SERVER_SSH_USR }}
+          password: ${{ secrets.SERVER_SSH_PSWD }}
+          script: |
+            docker stop ${{ env.REPO_NAME }} || true
+            docker rm ${{ env.REPO_NAME }} || true
+            docker rmi gcr.io/${{ env.GCR_PROJECT_ID }}/${{ env.REPO_NAME }} || true
+            
+            docker load -i /home/user/image.tar
+            rm /home/user/image.tar
+            
+            docker run --network ${{ secrets.DOCKER_NETWORK_NAME }} -d -p ${{ env.DOCKER_CONTAINER_PORT }}:${{ env.DOCKER_CONTAINER_PORT }} \
+            -e DOCKER_CONTAINER_PORT='${{ env.DOCKER_CONTAINER_PORT }}' \
+            -e PGUSER='${{ secrets.PGUSER }}' \
+            -e PGHOST='${{ secrets.PGHOST }}' \
+            -e PGPASSWORD='${{ secrets.PGPASSWORD }}' \
+            -e PGPORT='${{ secrets.PGPORT }}' \
+            -e MSQLIUSER='${{ secrets.MSQLIUSER }}' \
+            -e MSQLIHOST='${{ secrets.MSQLIHOST }}' \
+            -e MSQLIPASSWORD='${{ secrets.MSQLIPASSWORD }}' \
+            -e MSQLIPORT='${{ secrets.MSQLIPORT }}' \
+            --name ${{ env.REPO_NAME }} gcr.io/${{ secrets.GCR_PROJECT_ID }}/${{ env.REPO_NAME }}:latest
