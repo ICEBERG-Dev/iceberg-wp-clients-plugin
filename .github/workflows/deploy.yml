@@ -3,7 +3,7 @@ name: WP Callback API Service CI/CD
 on:
   push:
     branches:
-      - master
+      - main
 
 env:
   GCR_CREDENTIALS: ${{ secrets.GCR_CREDENTIALS }}
