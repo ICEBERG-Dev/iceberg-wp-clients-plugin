@@ -31,6 +31,7 @@ function extractNumbers(phone) {
         "comment": message
     };
     document.querySelector('.callback-widget-btn').disabled = true
+    document.querySelector('.callback-widget-btn').innerText = "Отправляем..."
     // Send data to plugin's PHP file using AJAX
     jQuery.ajax({
         url: "/wp-content/plugins/iceberg-crm-callback/admin/iceberg_crm_callback_send_form.php",
