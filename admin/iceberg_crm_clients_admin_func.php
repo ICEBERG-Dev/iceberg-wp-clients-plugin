@@ -142,32 +142,36 @@ function iceberg_crm_clients_get_token_from_db( ) {
 function iceberg_crm_clients_client_bonus_balance_shortcode() {
     //get token
     $token = iceberg_crm_clients_get_token_from_db();
-    //get email
-    $current_user = wp_get_current_user();
-    $user_email = $current_user->user_email;
-    $email = get_user_by( 'email', $user_email );
-    //get phone
-    $user_id = $current_user->ID;
-    $phone_number = get_user_meta( $user_id, 'phone_number', true );
-    if ($phone_number === ""){
-        $phone_number = get_user_meta( $user_id, 'billing_phone', true );
+    if ($token) {
+        //get email
+        $current_user = wp_get_current_user();
+        $user_email = $current_user->user_email;
+        $email = get_user_by('email', $user_email);
+        //get phone
+        $user_id = $current_user->ID;
+        $phone_number = get_user_meta($user_id, 'phone_number', true);
+        if ($phone_number === "") {
+            $phone_number = get_user_meta($user_id, 'billing_phone', true);
+        }
+        $phone = preg_replace('/[^0-9]/', '', $phone_number);
+        //get id
+        $crm_id = get_user_meta($current_user->ID, 'crmID', true);
+
+        $data = json_decode(iceberg_crm_clients_get_data_about_clients($token, $phone, $email, $crm_id), true);
+
+        if ($crm_id === "") {
+            $crm_id = $data['id'];
+            update_user_meta($current_user->ID, 'crmID', $crm_id);
+        }
+
+        if ($phone === "") {
+            $phone = $data['phone_number'];
+            update_user_meta($current_user->ID, 'phone_number', $phone);
+            update_user_meta($current_user->ID, 'billing_phone', $phone);
+        }
+
+        return $data['balance'];
+    } else {
+        return "";
     }
-    $phone = preg_replace( '/[^0-9]/', '', $phone_number );
-    //get id
-    $crm_id = get_user_meta( $current_user->ID, 'crmID', true );
-
-    $data = json_decode(iceberg_crm_clients_get_data_about_clients($token,$phone,$email,$crm_id),true);
-
-    if ($crm_id === ""){
-        $crm_id = $data['id'];
-        update_user_meta( $current_user->ID, 'crmID', $crm_id );
-    }
-
-    if ($phone === ""){
-        $phone = $data['phone_number'];
-        update_user_meta( $current_user->ID, 'phone_number', $phone );
-        update_user_meta( $current_user->ID, 'billing_phone', $phone );
-    }
-
-    return $data['balance'];
 }
