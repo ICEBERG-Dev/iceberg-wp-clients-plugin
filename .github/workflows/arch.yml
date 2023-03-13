@@ -13,8 +13,8 @@ jobs:
 
       - name: Package plugin
         run: |
-          zip -r iceberg-wp-clients-plugin.zip iceberg-wp-clients-plugin \
-            --exclude-from=<(git ls-files -z --cached --ignored --exclude-standard | xargs -0 echo --exclude=)
+          cd iceberg-wp-clients-plugin
+          zip -r ../iceberg-wp-clients-plugin.zip . -x $(git ls-files -z --ignored --exclude-standard | xargs -0 printf "'%s' ")
        
       - name: Upload artifact
         uses: actions/upload-artifact@v2
