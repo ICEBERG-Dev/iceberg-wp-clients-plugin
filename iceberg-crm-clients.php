@@ -32,9 +32,6 @@ function iceberg_crm_clients_uninstall() {
     global $wpdb;
     $table_name = $wpdb->prefix . 'iceberg_crm_clients_tokens';
     $wpdb->query("DROP TABLE IF EXISTS $table_name");
-
-    $table_name = $wpdb->prefix . 'iceberg_crm_clients_links';
-    $wpdb->query("DROP TABLE IF EXISTS $table_name");
 }
 
 add_action('admin_menu', 'add_iceberg_crm_clients_menu_page');
