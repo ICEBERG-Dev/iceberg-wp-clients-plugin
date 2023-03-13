@@ -74,6 +74,7 @@ jobs:
         
       - name: Get Latest Release
         uses: actions/github-script@v4
+        id: GetLatestRelease
         with:
           script: |
             const { data } = await github.repos.getLatestRelease({
