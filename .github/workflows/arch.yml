@@ -6,7 +6,7 @@ on:
       - main
 
 env:
-  PLUGIN_NAME: ${( secrets.PLUGIN_NAME })
+  PLUGIN_NAME: ${{ secrets.PLUGIN_NAME }}
 
 jobs:
   build:
