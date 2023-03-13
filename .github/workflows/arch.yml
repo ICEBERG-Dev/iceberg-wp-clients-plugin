@@ -26,7 +26,6 @@
 #           name: ${{ env.PLUGIN_NAME }}
 #           path: ${{ env.PLUGIN_NAME }}-plugin.zip
 
-
 name: Release Plugin Archive
 
 on:
@@ -76,4 +75,5 @@ jobs:
         with:
           asset_path: ${{ env.PLUGIN_NAME }}-plugin.zip
           asset_name: ${{ env.PLUGIN_NAME }}-plugin.zip
+          asset_content_type: "application/zip"
           upload_url: ${{ steps.create_release.outputs.upload_url }}
