@@ -10,13 +10,11 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v2
-        
-      - name: List files in current directory
-        run: ls -la
 
       - name: Package plugin
         run: |
           cd ..
+          ls -la
           zip -r iceberg-wp-clients-plugin.zip . -x $(git ls-files -z --ignored --exclude-standard | xargs -0 printf "'%s' ")
        
       - name: Upload artifact
