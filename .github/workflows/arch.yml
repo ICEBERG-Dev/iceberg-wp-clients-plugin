@@ -86,7 +86,7 @@ jobs:
       - name: Increment Version
         id: version
         run: |
-          echo ::set-output name=version::$(echo "${{ steps.GetLatestRelease.outputs.result }}" | awk -F. -v OFS=. '{ $3++; print }')
+          echo ::set-output name=version::$(echo "${{ steps.GetLatestRelease.outputs.result }}" | awk -F. -v OFS=. '{ if (NF < 2) { print $0 ".1" } else { $3++; print } }')
 
       - name: Use Incremented Version
         run: |
