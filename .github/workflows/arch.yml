@@ -89,9 +89,6 @@ jobs:
         run: |
           echo ::set-output name=version::$(echo "${{ steps.GetLatestRelease.outputs.result }}" | awk -F. -v OFS=. '{ if (NF < 2) { print $0 ".1" } else { $3++; print } }')
 
-      - name: Use Incremented Version
-        run: |
-          echo ${{ steps.version.outputs.version }}
                 
 #       - name: Get previous release version
 #         id: previous_release
@@ -117,8 +114,8 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ env.GITHUB_TOKEN }}
         with:
-          tag_name: ${{ github.event.release.tag_name || steps.semver.outputs.version }}
-          release_name: Release ${{ github.event.release.tag_name || steps.semver.outputs.version }}
+          tag_name: ${{ steps.version.outputs.version }}
+          release_name: Release ${{ steps.version.outputs.version }}
           body: |
             This is the first release of the plugin.
           draft: false
