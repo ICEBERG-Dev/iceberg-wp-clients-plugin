@@ -18,7 +18,7 @@ jobs:
 
       - name: Package plugin
         run: |
-          git archive --format=zip --output=${{ env.PLUGIN_NAME }}-plugin HEAD $(git diff-tree -r --no-commit-id --name-only --diff-filter=ACMRT HEAD | grep -v -E "$(git -C . grep '^/.*$' --line-regexp --name-only --invert-match --exclude-standard)")
+          git archive --format=zip --output=${{ env.PLUGIN_NAME }}-plugin.zip HEAD $(git diff-tree -r --no-commit-id --name-only --diff-filter=ACMRT HEAD | grep -v -E "$(git -C . grep '^/.*$' --line-regexp --name-only --invert-match --exclude-standard)")
 
       - name: Upload artifact
         uses: actions/upload-artifact@v2
