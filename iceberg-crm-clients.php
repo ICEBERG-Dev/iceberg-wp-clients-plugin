@@ -40,7 +40,6 @@ function iceberg_crm_clients_uninstall() {
 add_action('admin_menu', 'add_iceberg_crm_clients_menu_page');
 add_action('admin_init', 'iceberg_crm_clients_add_token_form_section_clients');
 add_action('admin_init', 'iceberg_crm_clients_handle_token_authentication_clients');
-add_action( 'wp_enqueue_scripts', 'iceberg_crm_clients_enqueue_scripts' );
 register_activation_hook( __FILE__, 'iceberg_crm_clients_install' );
 register_deactivation_hook( __FILE__, 'iceberg_crm_clients_uninstall' );
 add_shortcode( 'clientBonusBalance', 'iceberg_crm_clients_client_bonus_balance_shortcode' );
