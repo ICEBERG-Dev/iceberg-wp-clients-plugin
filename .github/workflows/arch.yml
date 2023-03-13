@@ -1,5 +1,4 @@
 # name: Release Plugin Archive
-
 # on:
 #   push:
 #     branches:
@@ -52,7 +51,6 @@
 
 
 name: Release Plugin Archive
-
 on:
   push:
     branches:
