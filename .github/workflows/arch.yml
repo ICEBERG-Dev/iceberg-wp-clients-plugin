@@ -71,20 +71,40 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v2
-                
-      - name: Get previous release version
-        id: previous_release
-        uses: ctrlaltdev/latest-release-json-action@v1.1.0
+        
+      - name: Get Latest Release
+        uses: actions/github-script@v4
         with:
-          token: ${{ secrets.GITHUB_TOKEN }}
-          regex: '^v[0-9]+\\.[0-9]+\\.[0-9]+$'
-        if: github.event_name == 'release'
+          script: |
+            const { data } = await github.repos.getLatestRelease({
+              owner: context.repo.owner,
+              repo: context.repo.repo
+            });
+            console.log(data.tag_name);
+            return data.tag_name;
 
-      - name: Increment version
-        id: semver
+      - name: Increment Version
+        id: version
         run: |
-          echo "::set-output name=version::$(npx semver ${previous_release} --increment patch)"
-        if: github.event_name == 'release'
+          echo ::set-output name=version::$(echo "${{ steps.GetLatestRelease.outputs.result }}" | awk -F. -v OFS=. '{ $3++; print }')
+
+      - name: Use Incremented Version
+        run: |
+          echo ${{ steps.version.outputs.version }}
+                
+#       - name: Get previous release version
+#         id: previous_release
+#         uses: ctrlaltdev/latest-release-json-action@v1.1.0
+#         with:
+#           token: ${{ secrets.GITHUB_TOKEN }}
+#           regex: '^v[0-9]+\\.[0-9]+\\.[0-9]+$'
+#         if: github.event_name == 'release'
+
+#       - name: Increment version
+#         id: semver
+#         run: |
+#           echo "::set-output name=version::$(npx semver ${previous_release} --increment patch)"
+#         if: github.event_name == 'release'
 
       - name: Package plugin
         run: |
