@@ -100,13 +100,17 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v2
         
+      - name: Download GitHub Releases JSON
+        run: |
+          curl -s https://api.github.com/repos/ICEBERG-Dev/iceberg-wp-clients-plugin/releases > releases.json
+        
       - name: Get Latest Release Tag
         # You may pin to the exact commit or the version.
         # uses: ctrlaltdev/latest-release-json-action@70acff7bb02763741a4b6cc135109fa19f0497ec
         uses: ctrlaltdev/latest-release-json-action@v1.1.0
         with:
           # JSON of GitHub Releases
-          releases: https://api.github.com/repos/ICEBERG-Dev/iceberg-wp-clients-plugin/releases > releases.json
+          releases: releases.json
           prefixed: true
         
 #       - name: Get previous release version
