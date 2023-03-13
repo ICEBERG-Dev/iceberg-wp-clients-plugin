@@ -1,0 +1,46 @@
+name: Release Plugin Archive
+
+on:
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: '1'
+        required: true
+
+env:
+  PLUGIN_NAME: ${{ secrets.PLUGIN_NAME }}
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Create release
+        id: create_release
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: ${{ github.event.inputs.tag }}
+          release_name: Release ${{ github.event.inputs.tag }}
+          draft: false
+          prerelease: false
+
+      - name: Download artifact
+        uses: actions/download-artifact@v2
+        with:
+          name: ${{ env.PLUGIN_NAME }}
+          path: ${{ env.PLUGIN_NAME }}-plugin.zip
+
+      - name: Upload artifact to release
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: ${{ env.PLUGIN_NAME }}-plugin.zip
+          asset_name: ${{ env.PLUGIN_NAME }}-plugin.zip
+          asset_content_type: application/zip
