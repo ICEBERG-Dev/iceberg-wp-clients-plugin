@@ -26,12 +26,67 @@
 #           name: ${{ env.PLUGIN_NAME }}
 #           path: ${{ env.PLUGIN_NAME }}-plugin.zip
 
+# name: Release Plugin Archive
+
+# on:
+#   push:
+#     branches:
+#       - main
+
+# env:
+#   PLUGIN_NAME: ${{ secrets.PLUGIN_NAME }}
+#   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+# jobs:
+#   build:
+#     runs-on: ubuntu-latest
+
+#     steps:
+#       - name: Checkout code
+#         uses: actions/checkout@v2
+
+#       - name: Package plugin
+#         run: |
+#           git archive --format=zip --output=${{ env.PLUGIN_NAME }}-plugin.zip HEAD $(git diff-tree -r --no-commit-id --name-only --diff-filter=ACMRT HEAD | grep -v -E "$(git -C . grep '^/.*$' --line-regexp --name-only --invert-match --exclude-standard)")
+
+#       - name: Create GitHub release
+#         uses: actions/create-release@v1
+#         id: create_release
+#         env:
+#           GITHUB_TOKEN: ${{ env.GITHUB_TOKEN }}
+#         with:
+#           tag_name: v1.0.2
+#           release_name: Release v1.0.2
+#           body: |
+#             This is the first release of the plugin.
+#           draft: false
+#           prerelease: false
+
+#       - name: Upload artifact
+#         uses: actions/upload-artifact@v2
+#         with:
+#           name: ${{ env.PLUGIN_NAME }}
+#           path: ${{ env.PLUGIN_NAME }}-plugin.zip
+
+#       - name: Attach artifact to release
+#         uses: actions/upload-release-asset@v1
+#         env:
+#           GITHUB_TOKEN: ${{ env.GITHUB_TOKEN }}
+#         with:
+#           asset_path: ${{ env.PLUGIN_NAME }}-plugin.zip
+#           asset_name: ${{ env.PLUGIN_NAME }}.zip
+#           asset_content_type: "application/zip"
+#           upload_url: ${{ steps.create_release.outputs.upload_url }}
+
+
 name: Release Plugin Archive
 
 on:
   push:
     branches:
       - main
+  release:
+    types: [created]
 
 env:
   PLUGIN_NAME: ${{ secrets.PLUGIN_NAME }}
@@ -45,6 +100,20 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v2
 
+      - name: Get previous release version
+        id: previous_release
+        uses: eins78/get-latest-release-tag@v1.3
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          regex: '^v[0-9]+\\.[0-9]+\\.[0-9]+$'
+        if: github.event_name == 'release'
+
+      - name: Increment version
+        id: semver
+        run: |
+          echo "::set-output name=version::$(npx semver ${previous_release} --increment patch)"
+        if: github.event_name == 'release'
+
       - name: Package plugin
         run: |
           git archive --format=zip --output=${{ env.PLUGIN_NAME }}-plugin.zip HEAD $(git diff-tree -r --no-commit-id --name-only --diff-filter=ACMRT HEAD | grep -v -E "$(git -C . grep '^/.*$' --line-regexp --name-only --invert-match --exclude-standard)")
@@ -55,12 +124,13 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ env.GITHUB_TOKEN }}
         with:
-          tag_name: v1.0.2
-          release_name: Release v1.0.2
+          tag_name: ${{ github.event.release.tag_name || steps.semver.outputs.version }}
+          release_name: Release ${{ github.event.release.tag_name || steps.semver.outputs.version }}
           body: |
             This is the first release of the plugin.
           draft: false
           prerelease: false
+        if: github.event_name == 'push'
 
       - name: Upload artifact
         uses: actions/upload-artifact@v2
@@ -77,3 +147,5 @@ jobs:
           asset_name: ${{ env.PLUGIN_NAME }}.zip
           asset_content_type: "application/zip"
           upload_url: ${{ steps.create_release.outputs.upload_url }}
+        if: github.event_name == 'push'
+
