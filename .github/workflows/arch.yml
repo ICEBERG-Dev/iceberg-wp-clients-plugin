@@ -12,7 +12,7 @@ jobs:
         uses: actions/checkout@v2
 
       - name: Package plugin
-        run: ls 
+        run: zip -r iceberg-wp-clients-plugin.zip ../iceberg-wp-clients-plugin
        
 #       - name: Upload artifact
 #         uses: actions/upload-artifact@v2
