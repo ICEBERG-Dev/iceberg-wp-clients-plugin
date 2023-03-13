@@ -1,7 +1,12 @@
+name: Build Plugin Archive
+
 on:
   push:
     branches:
       - main
+
+env:
+  PLUGIN_NAME: iceberg-wp-clients
 
 jobs:
   build:
@@ -11,23 +16,12 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v2
 
-#       - name: Package plugin
-#         run: |
-#           zip -r iceberg-wp-clients-plugin.zip . $(git ls-files -z --cached --ignored --exclude-standard | xargs -0 printf "'%s' " | sed 's/ / --exclude=/g')
-
-#       - name: Package plugin
-#         run: |
-#           git archive --format=zip --output=iceberg-wp-clients-plugin.zip HEAD $(git diff-tree -r --no-commit-id --name-only --diff-filter=ACMRT HEAD | grep -v -E "$(git -C . grep '^/.*$' --line-regexp --name-only --invert-match --exclude-standard)") 
-
       - name: Package plugin
         run: |
-          git config --global core.excludesfile .gitignore
-          git ls-files | zip -q -@ iceberg-wp-clients-plugin.zip
+          git archive --format=zip --output=${{ env.PLUGIN_NAME }}-plugin.zip HEAD $(git diff-tree -r --no-commit-id --name-only --diff-filter=ACMRT HEAD | grep -v -E "$(git -C . grep '^/.*$' --line-regexp --name-only --invert-match --exclude-standard)")
 
-
-       
       - name: Upload artifact
         uses: actions/upload-artifact@v2
         with:
-          name: iceberg-wp-clients.zip
-          path: iceberg-wp-clients-plugin.zip
+          name: ${{ env.PLUGIN_NAME }}.zip
+          path: ${{ env.PLUGIN_NAME }}-plugin.zip
