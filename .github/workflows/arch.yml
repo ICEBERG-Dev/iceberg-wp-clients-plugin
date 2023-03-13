@@ -6,7 +6,7 @@ on:
       - main
 
 env:
-  PLUGIN_NAME: iceberg-wp-clients
+  PLUGIN_NAME: ${ secrets.PLUGIN_NAME }
 
 jobs:
   build:
