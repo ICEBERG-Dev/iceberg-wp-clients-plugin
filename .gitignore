@@ -8,3 +8,5 @@
 # Ignore the zip archive created by the GitHub Actions workflow
 iceberg-wp-clients-plugin.zip
 *.md
+
+
