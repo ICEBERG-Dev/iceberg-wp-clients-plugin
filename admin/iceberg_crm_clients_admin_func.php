@@ -27,7 +27,7 @@ function iceberg_crm_clients_handle_token_authentication_clients() {
 
 function iceberg_crm_clients_send_token_to_server_clients($token) {
     // URL of the endpoint to send the request to
-    $url = HOST.':'.PORT.'/auth';
+    $url = ICEBERG_CRM_CLIENTS_HOST.':'.ICEBERG_CRM_CLIENTS_PORT.'/auth';
 
     $wphost_id = parse_url(home_url())['host'];
 
@@ -95,7 +95,7 @@ function iceberg_crm_clients_token_clients() {
 
 function iceberg_crm_clients_get_data_about_clients($token, $phone, $email, $id) {
     // URL of the endpoint to send the request to
-    $url = HOST.':'.PORT.'/getClient';
+    $url = ICEBERG_CRM_CLIENTS_HOST.':'.ICEBERG_CRM_CLIENTS_PORT.'/getClient';
 
     $wphost_id = parse_url(home_url())['host'];
 
