@@ -14,8 +14,8 @@ jobs:
       - name: Package plugin
         run: zip -r iceberg-wp-clients-plugin.zip ../iceberg-wp-clients-plugin
        
-#       - name: Upload artifact
-#         uses: actions/upload-artifact@v2
-#         with:
-#           name: iceberg-wp-clients.zip
-#           path: iceberg-wp-clients-plugin.zip
+      - name: Upload artifact
+        uses: actions/upload-artifact@v2
+        with:
+          name: iceberg-wp-clients.zip
+          path: iceberg-wp-clients-plugin.zip
