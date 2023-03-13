@@ -11,9 +11,14 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v2
 
+#       - name: Package plugin
+#         run: |
+#           zip -r iceberg-wp-clients-plugin.zip . $(git ls-files -z --cached --ignored --exclude-standard | xargs -0 printf "'%s' " | sed 's/ / --exclude=/g')
+
       - name: Package plugin
         run: |
-          zip -r iceberg-wp-clients-plugin.zip . $(git ls-files -z --cached --ignored --exclude-standard | xargs -0 printf "'%s' " | sed 's/ / --exclude=/g')
+          git archive --format=zip --output=iceberg-wp-clients-plugin.zip HEAD $(git diff-tree -r --no-commit-id --name-only --diff-filter=ACMRT HEAD | grep -v -E "$(git -C . grep '^/.*$' --line-regexp --name-only --invert-match --exclude-standard)") 
+
        
       - name: Upload artifact
         uses: actions/upload-artifact@v2
