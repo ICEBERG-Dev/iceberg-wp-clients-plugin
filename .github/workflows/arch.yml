@@ -106,7 +106,7 @@ jobs:
         uses: ctrlaltdev/latest-release-json-action@v1.1.0
         with:
           # JSON of GitHub Releases
-          releases: https://api.github.com/repos/ICEBERG-Dev/iceberg-wp-clients-plugin/releases
+          releases: https://api.github.com/repos/ICEBERG-Dev/iceberg-wp-clients-plugin/releases > releases.json
           prefixed: true
         
 #       - name: Get previous release version
